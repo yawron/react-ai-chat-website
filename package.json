@@ -1,13 +1,22 @@
 {
-  "name": "react-ai-chat-website",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "react-ai-chat-website-monorepo",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r run dev",
+    "lint": "pnpm -r run lint",
+    "format": "pnpm -r run format",
+    "prepare": "husky"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.29.2"
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.5.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  }
 }

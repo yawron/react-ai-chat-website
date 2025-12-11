@@ -1,0 +1,31 @@
+{
+  "name": "@ai-chat/plug",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@ai-chat/eslint-config": "workspace:*",
+    "@ai-chat/tsconfig": "workspace:*",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.24",
+    "eslint": "^9.21.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.5.2",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "backend/**/*.{ts,js,json}": [
+    "pnpm -C backend run format",
+    "pnpm -C backend run lint"
+  ],
+  "frontend/**/*.{ts,tsx,js,jsx,json,css,md}": [
+    "pnpm -C frontend run format",
+    "pnpm -C frontend run lint"
+  ]
+}
