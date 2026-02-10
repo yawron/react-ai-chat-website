@@ -6,6 +6,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import "@pc/locales";
 import ThemeToggle from "@pc/components/ThemeToggle";
 import { useUserStore, useLocaleStore, useThemeStore } from "@pc/store";
+import { ErrorBoundary } from "@pc/components/ErrorBoundary";
 import AntdGlobal from "@pc/utils/antdGlobal";
 
 function App() {
@@ -33,12 +34,14 @@ function App() {
     <ConfigProvider locale={antdLocale} theme={themeConfig}>
       <AntdApp>
         <AntdGlobal />
-        <XProvider theme={themeConfig}>
-          <div className="min-h-screen">
-            <Outlet />
-            <ThemeToggle />
-          </div>
-        </XProvider>
+        <ErrorBoundary>
+          <XProvider theme={themeConfig}>
+            <div className="min-h-screen">
+              <Outlet />
+              <ThemeToggle />
+            </div>
+          </XProvider>
+        </ErrorBoundary>
       </AntdApp>
     </ConfigProvider>
   );

@@ -1,7 +1,6 @@
 import {
   UserOutlined,
   LogoutOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import { Avatar, Dropdown, Button, Modal, App } from "antd";
 import { useState } from "react";
@@ -38,19 +37,6 @@ export function UserAvatar() {
 
   // 下拉菜单项
   const menuItems: MenuProps["items"] = [
-    {
-      key: "profile",
-      icon: <UserOutlined />,
-      label: "个人中心",
-    },
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "设置",
-    },
-    {
-      type: "divider",
-    },
     {
       key: "logout",
       icon: <LogoutOutlined />,
