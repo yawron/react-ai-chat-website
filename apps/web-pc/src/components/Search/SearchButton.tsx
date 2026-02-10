@@ -1,12 +1,13 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { Sender } from "@ant-design/x";
-import { Bubble } from "@ant-design/x";
 import { useRef, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { sessionApi } from "@pc/apis/session";
+import { useConversationStore } from "@pc/store";
 import { useThemeStore } from "@pc/store";
 
-import type { ChatMessage } from "@pc/types/session";
+import type { ChatSession } from "@pc/types/session";
 
 interface SearchButtonProps {
   isOpen: boolean;
@@ -15,22 +16,29 @@ interface SearchButtonProps {
 
 export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { setSelectedId } = useConversationStore();
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
-  const [searchResults, setSearchResults] = useState<ChatMessage[]>([]);
+  const [searchResults, setSearchResults] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [query, setQuery] = useState("");
 
   const handleSubmit = async (value: string) => {
-    if (value.trim()) {
+    const trimmedValue = value.trim();
+    setQuery(trimmedValue);
+    if (trimmedValue) {
       setIsLoading(true);
       try {
-        const { data } = await sessionApi.searchMessages(value.trim());
+        const { data } = await sessionApi.searchMessages(trimmedValue);
         setSearchResults(data);
       } catch (error) {
         console.error("搜索失败:", error);
       } finally {
         setIsLoading(false);
       }
+    } else {
+      setSearchResults([]);
     }
   };
 
@@ -110,27 +118,30 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
                 搜索中...
               </div>
             ) : searchResults.length > 0 ? (
-              <Bubble.List
-                items={searchResults.map((message, index) => ({
-                  key: index,
-                  role: message.role === "system" ? "ai" : "user",
-                  content: message.content,
-                }))}
-                roles={{
-                  ai: {
-                    placement: "start",
-                    style: {
-                      maxWidth: 600,
-                    },
-                  },
-                  user: {
-                    placement: "end",
-                  },
-                }}
-              />
+              <div className="space-y-2">
+                {searchResults.map((chat) => (
+                  <button
+                    key={chat.id}
+                    type="button"
+                    className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:hover:bg-gray-800"
+                    onClick={() => {
+                      setSelectedId(chat.id);
+                      navigate(`/conversation/${chat.id}`);
+                      onClose();
+                    }}
+                  >
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                      {chat.title}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      更新于 {new Date(chat.updateTime).toLocaleString()}
+                    </div>
+                  </button>
+                ))}
+              </div>
             ) : (
               <div className="text-center text-gray-500 dark:text-gray-400">
-                输入关键词开始搜索
+                {query ? "无匹配会话" : "输入关键词开始搜索"}
               </div>
             )}
           </div>

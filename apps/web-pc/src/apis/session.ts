@@ -94,8 +94,8 @@ export const sessionApi = {
     });
   },
   // 搜索聊天记录
-  searchMessages: (keyword: string): Promise<Data<ChatMessage[]>> => {
-    return request<ChatMessage[]>(`/chat/searchChat`, "GET", {
+  searchMessages: (keyword: string): Promise<Data<ChatSession[]>> => {
+    return request<ChatSession[]>(`/chat/searchChat`, "GET", {
       keyWord: keyword,
     });
   },
