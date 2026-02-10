@@ -28,7 +28,13 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       placement="left"
     >
       <FloatButton
-        icon={isDark ? <BulbOutlined /> : <BulbFilled />}
+        icon={
+          isDark ? (
+            <BulbOutlined style={{ color: "rgba(255, 255, 255, 0.85)" }} />
+          ) : (
+            <BulbFilled />
+          )
+        }
         onClick={toggleTheme}
         style={position}
         type={isDark ? "default" : "primary"}

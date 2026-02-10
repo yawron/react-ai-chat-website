@@ -19,11 +19,20 @@ import type {
 export const getCheckFileAPI = (
   fileId: string,
   fileName: string,
+  fileSize?: number,
   chatId?: string,
 ) => {
-  return request<checkRespType>(
-    `/file/check?fileId=${fileId}&fileName=${fileName}&chatId=${chatId}`,
-  );
+  const params = new URLSearchParams({
+    fileId,
+    fileName,
+  });
+  if (chatId) {
+    params.set("chatId", chatId);
+  }
+  if (fileSize !== undefined) {
+    params.set("fileSize", String(fileSize));
+  }
+  return request<checkRespType>(`/file/check?${params.toString()}`);
 };
 
 /**

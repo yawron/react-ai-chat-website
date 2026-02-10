@@ -9,13 +9,13 @@ export function LayoutWithSidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-white text-gray-900 dark:bg-[#141414] dark:text-gray-100">
       <div
         className={`${
           collapsed ? "w-10" : "w-64"
-        } bg-gray-50 border-r border-gray-200 transition-all duration-300 flex flex-col overflow-y-scroll`}
+        } bg-gray-50 border-r border-gray-200 transition-all duration-300 flex flex-col overflow-y-scroll dark:bg-[#1f1f1f] dark:border-gray-800`}
       >
-        <div className="flex justify-between items-center p-2 border-b border-gray-200 bg-gray-50">
+        <div className="flex justify-between items-center p-2 border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-[#1f1f1f]">
           {!collapsed && (
             <img src="/gpt.jpg" alt="GPT Logo" className="w-8 h-8" />
           )}
@@ -23,19 +23,19 @@ export function LayoutWithSidebar() {
             {collapsed ? (
               <MenuUnfoldOutlined
                 onClick={() => setCollapsed(false)}
-                className="cursor-pointer text-gray-600 hover:text-gray-800"
+                className="cursor-pointer text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100"
               />
             ) : (
               <MenuFoldOutlined
                 onClick={() => setCollapsed(true)}
-                className="cursor-pointer text-gray-600 hover:text-gray-800"
+                className="cursor-pointer text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100"
               />
             )}
           </div>
         </div>
         {!collapsed && <ConversationSidebar />}
       </div>
-      <div className="flex-1 relative overflow-hidden bg-white">
+      <div className="flex-1 relative overflow-hidden bg-white dark:bg-[#141414]">
         <div className="absolute top-0 right-0 p-4 z-10">
           <UserAvatar />
         </div>

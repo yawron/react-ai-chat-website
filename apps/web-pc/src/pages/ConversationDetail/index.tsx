@@ -26,7 +26,7 @@ export function ConversationDetail() {
 
   return (
     <div className="p-4">
-      <div className="p-4 rounded-lg shadow">
+      <div className="p-4 rounded-lg shadow bg-white dark:bg-[#141414] transition-colors duration-200">
         {currentConversation ? (
           <>
             <div className="flex justify-between items-center">

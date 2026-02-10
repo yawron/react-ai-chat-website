@@ -1,11 +1,5 @@
-import {
-  CoffeeOutlined,
-  LinkOutlined,
-  FireOutlined,
-  SmileOutlined,
-  CloseOutlined,
-} from "@ant-design/icons";
-import { Attachments, Prompts, Sender } from "@ant-design/x";
+import { LinkOutlined } from "@ant-design/icons";
+import { Attachments, Sender } from "@ant-design/x";
 import { Button, App, Spin, type GetRef } from "antd";
 import React, { useRef, useState } from "react";
 import SparkMD5 from "spark-md5";
@@ -22,7 +16,6 @@ import { BASE_URL, DEFAULT_MESSAGE } from "@pc/constant";
 import { useChatStore, useConversationStore } from "@pc/store";
 import { isImageByExtension } from "@pc/utils/judgeImage";
 
-import type { PromptsProps } from "@ant-design/x";
 import type { RcFile } from "antd/es/upload";
 
 // 切片的大小 - 使用2MB分片大小以提高上传效率
@@ -40,7 +33,7 @@ const AIRichInput = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [inputLoading, setInputLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [hasInput, setHasInput] = useState(false);
+  // const [hasInput, setHasInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const attachmentsRef = useRef<GetRef<typeof Attachments>>(null);
   const senderRef = useRef<GetRef<typeof Sender>>(null);
@@ -52,14 +45,14 @@ const AIRichInput = () => {
   const fileIdRef = useRef<string | null>(null);
   const fileNameRef = useRef<string | null>(null);
   const filePathRef = useRef<string | null>(null);
-  const [showPrompts, setShowPrompts] = useState(true);
+  // const [showPrompts, setShowPrompts] = useState(true);
   const { messages, addMessage, addChunkMessage } = useChatStore();
   const { selectedId, setSelectedId, addConversation } = useConversationStore();
 
   // 监听输入值变化
   const handleInputChange = (value: string) => {
     setInputValue(value);
-    setHasInput(!!value.trim());
+    // setHasInput(!!value.trim());
   };
   // const [selectedImages, setSelectedImages] = useState<string[]>([])
 
@@ -101,37 +94,41 @@ const AIRichInput = () => {
     });
   };
 
-  // 计算文件hash（用于文件唯一标识）
-  const calculateFileHash = async (
-    fileChunks: ChunkInfo[],
-  ): Promise<string> => {
+  const calculateFileHash = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const spark = new SparkMD5.ArrayBuffer();
-      const chunks: Blob[] = [];
-
-      fileChunks.forEach((chunk, index) => {
-        if (index === 0 || index === fileChunks.length - 1) {
-          // 第一个和最后一个切片的内容全部参与计算
-          chunks.push(chunk.chunk);
-        } else {
-          // 中间剩余的切片分别在前面、后面和中间取2个字节参与计算
-          chunks.push(chunk.chunk.slice(0, 2));
-          chunks.push(chunk.chunk.slice(CHUNK_SIZE / 2, CHUNK_SIZE / 2 + 2));
-          chunks.push(chunk.chunk.slice(CHUNK_SIZE - 2, CHUNK_SIZE));
-        }
-      });
-
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(new Blob(chunks));
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          spark.append(e.target.result as ArrayBuffer);
-          resolve(spark.end());
-        } else {
-          reject(new Error("Failed to read chunk"));
-        }
+      const worker = new Worker(
+        new URL("../../workers/fileHash.worker.ts", import.meta.url),
+        { type: "module" },
+      );
+      const cleanup = () => {
+        worker.removeEventListener("message", handleMessage);
+        worker.removeEventListener("error", handleError);
+        worker.terminate();
       };
-      reader.onerror = () => reject(new Error("Error reading file hash"));
+      const handleMessage = (
+        event: MessageEvent<{ hash?: string; error?: string }>,
+      ) => {
+        const { hash, error } = event.data || {};
+        if (error) {
+          cleanup();
+          reject(new Error(error));
+          return;
+        }
+        if (!hash) {
+          cleanup();
+          reject(new Error("Failed to calculate file hash"));
+          return;
+        }
+        cleanup();
+        resolve(hash);
+      };
+      const handleError = (event: ErrorEvent) => {
+        cleanup();
+        reject(event.error || new Error(event.message));
+      };
+      worker.addEventListener("message", handleMessage);
+      worker.addEventListener("error", handleError);
+      worker.postMessage({ file, chunkSize: CHUNK_SIZE });
     });
   };
 
@@ -181,7 +178,10 @@ const AIRichInput = () => {
     uploaded: number[],
     controller: AbortController,
   ): Promise<boolean> => {
-    uploadedChunksRef.current = uploaded;
+    const normalizedUploaded = Array.from(new Set(uploaded)).filter(
+      (index) => index >= 0 && index < fileChunks.length,
+    );
+    uploadedChunksRef.current = normalizedUploaded;
     fileChunksRef.current = fileChunks;
 
     const pendingChunks = fileChunks.filter(
@@ -247,7 +247,7 @@ const AIRichInput = () => {
       const fileChunks = createFileChunks(file);
 
       // 计算整个文件的hash作为fileId
-      const fileId = await calculateFileHash(fileChunks);
+      const fileId = await calculateFileHash(file);
       fileIdRef.current = fileId;
 
       // 分片上传前的校验
@@ -256,6 +256,7 @@ const AIRichInput = () => {
       } = await getCheckFileAPI(
         fileId,
         file.name,
+        file.size,
         selectedId ? selectedId : "",
       );
 
@@ -465,13 +466,13 @@ const AIRichInput = () => {
     }
 
     // 重置输入状态和清空输入框
-    setHasInput(false);
+    // setHasInput(false);
     setInputValue("");
   };
 
   const senderHeader = (
     <Sender.Header
-      title="Attachments"
+      title="附件"
       styles={{
         content: {
           padding: 0,
@@ -534,62 +535,12 @@ const AIRichInput = () => {
     }
   };
 
-  const items: PromptsProps["items"] = [
-    {
-      key: "1",
-      icon: <CoffeeOutlined style={{ color: "#964B00" }} />,
-      description: "How to rest effectively after long hours of work?",
-      disabled: false,
-    },
-    {
-      key: "2",
-      icon: <SmileOutlined style={{ color: "#FAAD14" }} />,
-      description: "What are the secrets to maintaining a positive mindset?",
-      disabled: false,
-    },
-    {
-      key: "3",
-      icon: <FireOutlined style={{ color: "#FF4D4F" }} />,
-      description: "How to stay calm under immense pressure?",
-      disabled: false,
-    },
-  ];
-
-  // 处理提示建议点击
-  const handlePromptClick: PromptsProps["onItemClick"] = (info) => {
-    console.log("点击了提示建议:", info.data);
-    if (typeof info.data.description === "string") {
-      setInputValue(info.data.description);
-    }
-    setHasInput(true);
-  };
-
   return (
     <React.Fragment>
       <div
-        className={`fixed w-1/2 z-50 ${!selectedId ? "bottom-1/3" : "bottom-0"} pb-[30px] bg-white`}
+        className={`fixed w-1/2 z-50 ${!selectedId ? "bottom-1/3" : "bottom-0"} pb-[30px] bg-white dark:bg-[#141414] transition-colors duration-200`}
       >
         {showDefaultMessage()}
-        {!inputLoading && !hasInput && showPrompts && (
-          <div className="flex justify-between">
-            <Prompts
-              className="mb-4 mt-4"
-              title="🤔 You might also want to ask:"
-              items={items}
-              vertical
-              onItemClick={handlePromptClick}
-            />
-
-            {/* 关闭Prompts */}
-            <div className="mt-2">
-              <Button
-                type="text"
-                icon={<CloseOutlined />}
-                onClick={() => setShowPrompts(false)}
-              />
-            </div>
-          </div>
-        )}
 
         <Sender
           ref={senderRef}

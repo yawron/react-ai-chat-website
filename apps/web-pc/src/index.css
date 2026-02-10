@@ -5,8 +5,9 @@
     @apply bg-white text-gray-900 transition-colors duration-200;
   }
 
-  .dark body {
-    @apply bg-black text-gray-100;
+  html.dark body,
+  body.dark {
+    @apply bg-[#141414] text-gray-100;
   }
 
   /* 添加 placeholder 样式 */
@@ -14,7 +15,8 @@
     @apply text-gray-500;
   }
 
-  .dark input::placeholder {
+  html.dark input::placeholder,
+  body.dark input::placeholder {
     @apply text-gray-300;
   }
 }

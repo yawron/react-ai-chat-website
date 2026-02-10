@@ -1,7 +1,4 @@
-import {
-  UserOutlined,
-  LogoutOutlined,
-} from "@ant-design/icons";
+import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, Button, Modal, App } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";

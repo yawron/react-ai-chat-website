@@ -62,7 +62,7 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
         <div
           ref={modalRef}
           className={`w-[640px] rounded-xl border shadow-2xl overflow-hidden ${
-            isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+            isDark ? "bg-[#141414] border-gray-700" : "bg-white border-gray-200"
           }`}
         >
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -98,7 +98,9 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
             <Sender
               placeholder="搜索聊天记录..."
               onSubmit={handleSubmit}
-              prefix={<SearchOutlined className="text-gray-500" />}
+              prefix={
+                <SearchOutlined className="text-gray-500 dark:text-gray-400" />
+              }
               className="search-sender"
             />
           </div>

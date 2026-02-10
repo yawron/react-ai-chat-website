@@ -1,32 +1,32 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type ThemeType = "light" | "dark";
-
-type ThemeState = {
-  theme: ThemeType;
+interface ThemeState {
+  theme: "light" | "dark";
   toggleTheme: () => void;
-};
+  setTheme: (theme: "light" | "dark") => void;
+}
 
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
       theme: "light",
       toggleTheme: () =>
-        set((state) => {
-          const newTheme = state.theme === "light" ? "dark" : "light";
-          document.documentElement.classList.toggle(
-            "dark",
-            newTheme === "dark",
-          );
-          return { theme: newTheme };
-        }),
+        set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })),
+      setTheme: (theme) => set({ theme }),
     }),
-    { name: "theme-storage" },
+    {
+      name: "theme-storage",
+    },
   ),
 );
 
+// 初始化主题函数
 export const initializeTheme = () => {
-  const theme = useThemeStore.getState().theme;
-  document.documentElement.classList.toggle("dark", theme === "dark");
+  const state = useThemeStore.getState();
+  // 这里可以添加额外的主题初始化逻辑，例如根据系统主题设置
+  if (!localStorage.getItem("theme-storage")) {
+    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    state.setTheme(isDark ? "dark" : "light");
+  }
 };
