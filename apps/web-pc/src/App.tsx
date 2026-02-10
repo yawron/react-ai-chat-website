@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
 import "@pc/locales";
-import ThemeToggle from "@pc/components/ThemeToggle";
+import ThemeToggle from "@pc/shared/components/ThemeToggle";
 import { useUserStore, useLocaleStore, useThemeStore } from "@pc/store";
-import { ErrorBoundary } from "@pc/components/ErrorBoundary";
+import { ErrorBoundary } from "@pc/shared/components/ErrorBoundary";
 import AntdGlobal from "@pc/utils/antdGlobal";
 
 function App() {

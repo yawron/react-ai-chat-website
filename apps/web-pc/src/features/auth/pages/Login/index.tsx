@@ -3,10 +3,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import AuthLanguageSwitch from "@pc/components/Author/AuthLanguageSwitch";
-import AuthLayout from "@pc/components/Author/AuthLayout";
-import AuthLink from "@pc/components/Author/AuthLink";
-import EmailForm from "@pc/components/Author/EmailForm";
+import AuthLanguageSwitch from "@pc/features/auth/components/Author/AuthLanguageSwitch";
+import AuthLayout from "@pc/features/auth/components/Author/AuthLayout";
+import AuthLink from "@pc/features/auth/components/Author/AuthLink";
+import EmailForm from "@pc/features/auth/components/Author/EmailForm";
 import { userService } from "@pc/services/userService";
 
 import type { LoginParams } from "@pc/types/user";

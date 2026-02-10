@@ -2,8 +2,8 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 
-import { UserAvatar } from "@pc/components/Author/UserAvatar";
-import { ConversationSidebar } from "@pc/components/Conversation/ConversationSidebar";
+import { UserAvatar } from "@pc/features/auth/components/Author/UserAvatar";
+import { ConversationSidebar } from "@pc/features/chat/components/Conversation/ConversationSidebar";
 
 export function LayoutWithSidebar() {
   const [collapsed, setCollapsed] = useState(false);

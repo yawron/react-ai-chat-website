@@ -6,14 +6,14 @@ import {
 } from "react-router-dom";
 
 import App from "@pc/App";
-import { LayoutWithSidebar } from "@pc/components/Layout/LayoutWithSidebar";
-import { PageTransition } from "@pc/components/PageTransition/PageTransition";
-import { WithPermission } from "@pc/components/WithPermission/WithPermission";
-import Agents from "@pc/pages/Agents";
-import CreateAccount from "@pc/pages/CreateAccount";
-import Home from "@pc/pages/Home";
-import Login from "@pc/pages/Login";
-import { SharedChat } from "@pc/pages/SharedChat";
+import { LayoutWithSidebar } from "@pc/shared/components/Layout/LayoutWithSidebar";
+import { PageTransition } from "@pc/shared/components/PageTransition/PageTransition";
+import { WithPermission } from "@pc/shared/components/WithPermission/WithPermission";
+import Agents from "@pc/features/agents/pages/Agents";
+import CreateAccount from "@pc/features/auth/pages/CreateAccount";
+import Home from "@pc/features/chat/pages/Home";
+import Login from "@pc/features/auth/pages/Login";
+import { SharedChat } from "@pc/features/shared-chat/pages/SharedChat";
 
 // 创建React Router路由
 const routeElements = createRoutesFromElements(

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { sessionApi } from "@pc/apis/session";
-import { SearchButton } from "@pc/components/Search/SearchButton";
+import { SearchButton } from "@pc/features/chat/components/Search/SearchButton";
 import { useChatStore } from "@pc/store";
 
 import { useConversationActions } from "./hooks/useConversationActions";

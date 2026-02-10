@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type Method } from "axios";
 
 import { BASE_URL } from "@pc/constant";
-import router from "@pc/router";
+import router from "@pc/app/router";
 import { useUserStore } from "@pc/store/useUserStore";
 import { message } from "@pc/utils/antdGlobal";
 

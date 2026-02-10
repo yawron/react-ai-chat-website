@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import AuthLanguageSwitch from "@pc/components/Author/AuthLanguageSwitch";
-import AuthLayout from "@pc/components/Author/AuthLayout";
-import AuthLink from "@pc/components/Author/AuthLink";
-import RegisterForm from "@pc/components/Author/RegisterForm";
+import AuthLanguageSwitch from "@pc/features/auth/components/Author/AuthLanguageSwitch";
+import AuthLayout from "@pc/features/auth/components/Author/AuthLayout";
+import AuthLink from "@pc/features/auth/components/Author/AuthLink";
+import RegisterForm from "@pc/features/auth/components/Author/RegisterForm";
 import { userService } from "@pc/services/userService";
 import { useUserStore } from "@pc/store/useUserStore";
 
