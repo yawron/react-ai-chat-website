@@ -17,7 +17,12 @@ export function LayoutWithSidebar() {
       >
         <div className="flex justify-between items-center p-2 border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-[#1f1f1f]">
           {!collapsed && (
-            <img src="/gpt.jpg" alt="GPT Logo" className="w-8 h-8" />
+            <img
+              src="/gpt.jpg"
+              alt="GPT Logo"
+              loading="lazy"
+              className="w-8 h-8"
+            />
           )}
           <div className="flex items-center">
             {collapsed ? (

@@ -21,7 +21,7 @@ type ContentHandlers = {
 const imageContent = (data: ImageContent): ReactElement => {
   const { content } = data;
   console.log(content, "content");
-  return <Image src={content}></Image>;
+  return <Image src={content} loading="lazy"></Image>;
 };
 
 const fileContent = (data: FileContent): ReactElement => {
