@@ -94,42 +94,87 @@ const AIRichInput = () => {
     });
   };
 
-  const calculateFileHash = async (file: File): Promise<string> => {
+  const calculateFileHashMainThread = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const worker = new Worker(
-        new URL("../../workers/fileHash.worker.ts", import.meta.url),
-        { type: "module" },
-      );
-      const cleanup = () => {
-        worker.removeEventListener("message", handleMessage);
-        worker.removeEventListener("error", handleError);
-        worker.terminate();
-      };
-      const handleMessage = (
-        event: MessageEvent<{ hash?: string; error?: string }>,
-      ) => {
-        const { hash, error } = event.data || {};
-        if (error) {
-          cleanup();
-          reject(new Error(error));
-          return;
+      const spark = new SparkMD5.ArrayBuffer();
+      const reader = new FileReader();
+      const chunkSize = CHUNK_SIZE;
+      const chunks = Math.ceil(file.size / chunkSize);
+      let currentChunk = 0;
+
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          spark.append(e.target.result as ArrayBuffer);
+          currentChunk++;
+
+          if (currentChunk < chunks) {
+            loadNext();
+          } else {
+            resolve(spark.end());
+          }
+        } else {
+          reject(new Error("Failed to read file"));
         }
-        if (!hash) {
-          cleanup();
-          reject(new Error("Failed to calculate file hash"));
-          return;
-        }
-        cleanup();
-        resolve(hash);
       };
-      const handleError = (event: ErrorEvent) => {
-        cleanup();
-        reject(event.error || new Error(event.message));
+
+      reader.onerror = () => {
+        reject(new Error("Error reading file"));
       };
-      worker.addEventListener("message", handleMessage);
-      worker.addEventListener("error", handleError);
-      worker.postMessage({ file, chunkSize: CHUNK_SIZE });
+
+      function loadNext() {
+        const start = currentChunk * chunkSize;
+        const end = Math.min(file.size, start + chunkSize);
+        reader.readAsArrayBuffer(file.slice(start, end));
+      }
+
+      loadNext();
     });
+  };
+
+  const calculateFileHash = async (file: File): Promise<string> => {
+    try {
+      return await new Promise((resolve, reject) => {
+        const worker = new Worker(
+          new URL("../../../../workers/fileHash.worker.ts", import.meta.url),
+          { type: "module" },
+        );
+        const cleanup = () => {
+          worker.removeEventListener("message", handleMessage);
+          worker.removeEventListener("error", handleError);
+          worker.terminate();
+        };
+        const handleMessage = (
+          event: MessageEvent<{ hash?: string; error?: string }>,
+        ) => {
+          const { hash, error } = event.data || {};
+          if (error) {
+            cleanup();
+            reject(new Error(error));
+            return;
+          }
+          if (!hash) {
+            cleanup();
+            reject(new Error("Failed to calculate file hash"));
+            return;
+          }
+          cleanup();
+          resolve(hash);
+        };
+        const handleError = (event: ErrorEvent) => {
+          cleanup();
+          reject(event.error || new Error(event.message));
+        };
+        worker.addEventListener("message", handleMessage);
+        worker.addEventListener("error", handleError);
+        worker.postMessage({ file, chunkSize: CHUNK_SIZE });
+      });
+    } catch (error) {
+      console.warn(
+        "Worker calculation failed, falling back to main thread:",
+        error,
+      );
+      return calculateFileHashMainThread(file);
+    }
   };
 
   // 上传单个分片
