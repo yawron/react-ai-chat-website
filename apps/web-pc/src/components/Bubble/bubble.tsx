@@ -1,7 +1,9 @@
 import { UserOutlined } from "@ant-design/icons";
 import { Bubble } from "@ant-design/x";
-import { forwardRef } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { Virtuoso } from "react-virtuoso";
+import debounce from "lodash/debounce";
+import throttle from "lodash/throttle";
 
 import { useChatStore, useConversationStore } from "@pc/store";
 
@@ -13,19 +15,11 @@ import type { HTMLAttributes } from "react";
 import "./bubble.css"; // 添加CSS导入
 import "highlight.js/styles/github.css";
 
-const Scroller = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  (props, ref) => (
-    <div
-      {...props}
-      ref={ref}
-      className={`${props.className ? `${props.className} ` : ""}chat-bubble-list`}
-    />
-  ),
-);
-
 export const ChatBubble = () => {
   const { messages } = useChatStore();
   const { selectedId } = useConversationStore();
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const getBubbleProps = (role: Role) => {
     if (role === "system") {
@@ -51,6 +45,36 @@ export const ChatBubble = () => {
   const chatMessage = selectedId ? messages.get(selectedId) : [];
 
   // 渲染消息内容
+  const handleScroll = useMemo(
+    () =>
+      throttle(
+        (scrollTop: number, scrollHeight: number, clientHeight: number) => {
+          setIsAtBottom(scrollHeight - (scrollTop + clientHeight) < 12);
+        },
+        80,
+      ),
+    [],
+  );
+
+  const handleResize = useMemo(
+    () =>
+      debounce(() => {
+        if (!scrollerRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = scrollerRef.current;
+        setIsAtBottom(scrollHeight - (scrollTop + clientHeight) < 12);
+      }, 200),
+    [],
+  );
+
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      handleResize.cancel();
+      handleScroll.cancel();
+    };
+  }, [handleResize, handleScroll]);
+
   const renderMessageContent = (content: MessageContent[]) => {
     if (!content || content.length === 0) {
       return null;
@@ -75,9 +99,34 @@ export const ChatBubble = () => {
   return (
     <Virtuoso
       data={chatMessage || []}
-      followOutput="smooth"
+      followOutput={isAtBottom ? "smooth" : false}
       components={{
-        Scroller,
+        Scroller: forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+          (props, ref) => (
+            <div
+              {...props}
+              ref={(node) => {
+                scrollerRef.current = node;
+                if (typeof ref === "function") {
+                  ref(node);
+                } else if (ref) {
+                  ref.current = node;
+                }
+              }}
+              className={`${
+                props.className ? `${props.className} ` : ""
+              }chat-bubble-list`}
+              onScroll={(event) => {
+                if (!event.currentTarget) return;
+                handleScroll(
+                  event.currentTarget.scrollTop,
+                  event.currentTarget.scrollHeight,
+                  event.currentTarget.clientHeight,
+                );
+              }}
+            />
+          ),
+        ),
         Footer: () => <div style={{ height: "25%" }} />,
       }}
       style={{

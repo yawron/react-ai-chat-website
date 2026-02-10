@@ -1,6 +1,7 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { Sender } from "@ant-design/x";
-import { useRef, useEffect, useState } from "react";
+import debounce from "lodash/debounce";
+import { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { sessionApi } from "@pc/apis/session";
@@ -24,7 +25,7 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
 
-  const handleSubmit = async (value: string) => {
+  const runSearch = useCallback(async (value: string) => {
     const trimmedValue = value.trim();
     setQuery(trimmedValue);
     if (trimmedValue) {
@@ -39,7 +40,19 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
       }
     } else {
       setSearchResults([]);
+      setIsLoading(false);
     }
+  }, []);
+
+  const debouncedSearch = useMemo(() => debounce(runSearch, 300), [runSearch]);
+
+  const handleChange = (value: string) => {
+    debouncedSearch(value);
+  };
+
+  const handleSubmit = (value: string) => {
+    debouncedSearch.cancel();
+    runSearch(value);
   };
 
   useEffect(() => {
@@ -60,6 +73,12 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   if (!isOpen) return null;
 
@@ -106,6 +125,7 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
             <Sender
               placeholder="搜索聊天记录..."
               onSubmit={handleSubmit}
+              onChange={handleChange}
               prefix={
                 <SearchOutlined className="text-gray-500 dark:text-gray-400" />
               }
