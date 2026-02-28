@@ -5,7 +5,7 @@ import {
   postFileChunksAPI,
   postMergeFileAPI,
 } from "@pc/apis/chat";
-import type { ChunkInfo, UploadTask } from "../types";
+import type { ChunkInfo, FileListItem, UploadTask } from "../types";
 import { CONCURRENT_UPLOADS, MAX_RETRY_COUNT } from "./file-config";
 import { calculateProgress } from "./file-utils";
 
@@ -33,8 +33,8 @@ export const uploadSingleChunk = async (
   controller: AbortController,
 ): Promise<boolean> => {
   try {
-    // 计算分片的 hash
-    const chunkBuffer = await chunk.chunk.arrayBuffer();
+    // chunk.chunk 已经是 ArrayBuffer
+    const chunkBuffer = chunk.chunk;
     const spark = new SparkMD5.ArrayBuffer();
     spark.append(chunkBuffer);
     const chunkHash = spark.end();
@@ -43,17 +43,18 @@ export const uploadSingleChunk = async (
     formData.append("fileId", fileId);
     formData.append("fileName", fileName);
     formData.append("index", String(chunk.index));
-    formData.append("chunk", chunk.chunk);
+    // ArrayBuffer 转 Blob
+    formData.append("chunk", new Blob([chunkBuffer]));
     formData.append("chunkHash", chunkHash);
 
     const response = await postFileChunksAPI(formData, controller.signal);
 
     return !!response;
   } catch (error: unknown) {
-    if (error instanceof Error && error.name === "AbortError false;
+    if (error instanceof Error && error.name === "AbortError") {
+      return false;
     }
-") {
-      return    return false;
+    return false;
   }
 };
 
@@ -103,8 +104,7 @@ export const uploadChunksWithConcurrency = async (
         successChunks.push(chunk.index);
         // 更新进度
         const totalChunks = allChunks.length;
-        const uploadedCount =
-          alreadyUploadedRef.current + successChunks.length;
+        const uploadedCount = alreadyUploadedRef.current + successChunks.length;
         setUploadProgress(calculateProgress(uploadedCount, totalChunks));
 
         return true;
@@ -117,7 +117,7 @@ export const uploadChunksWithConcurrency = async (
         } else {
           // 重试次数用完，记录失败
           failedIndexes.push(chunk.index);
-          setFailedChunks((prev) => [...prev, chunk.index]);
+          setFailedChunks([...failedIndexes]);
           return false;
         }
       }
@@ -131,10 +131,7 @@ export const uploadChunksWithConcurrency = async (
       runningTasks.clear();
 
       // 如果还有任务，继续执行
-      while (
-        uploadTasks.length > 0 &&
-        runningTasks.size < CONCURRENT_UPLOADS
-      ) {
+      while (uploadTasks.length > 0 && runningTasks.size < CONCURRENT_UPLOADS) {
         if (controller.signal.aborted) break;
 
         const task = uploadTasks.shift();
@@ -168,7 +165,7 @@ export const mergeFile = async (
   fileName: string,
   fileChunks: ChunkInfo[],
   setUploadProgress: (progress: number) => void,
-  setFileList: React.Dispatch<React.SetStateAction<any[]>>,
+  setFileList: React.Dispatch<React.SetStateAction<FileListItem[]>>,
   message: { success: (msg: string) => void },
 ): Promise<{ filePath: string }> => {
   const {
@@ -217,7 +214,7 @@ export const startUploadProcess = async (
 
   // 向后端接口发送一个前置请求，带上文件名和 hash
   const {
-    data: { isCompleted, uploaded: uploadedChunkIndices = [], filePath },
+    data: { isCompleted, uploaded: uploadedChunkIndices = [] },
   } = await getCheckFileAPI(
     fileId,
     fileName,
@@ -243,10 +240,7 @@ export const startUploadProcess = async (
 
   // filter 留下未上传分片的索引，得到需要上传索引数组
   const totalChunkCount = fileChunks.length;
-  const allChunkIndices = Array.from(
-    { length: totalChunkCount },
-    (_, i) => i,
-  );
+  const allChunkIndices = Array.from({ length: totalChunkCount }, (_, i) => i);
   const pendingChunks = allChunkIndices.filter(
     (index) => !alreadyUploadedChunks.includes(index),
   );

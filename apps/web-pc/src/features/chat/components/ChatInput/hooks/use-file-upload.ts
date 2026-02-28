@@ -3,7 +3,7 @@ import { App } from "antd";
 import type { RcFile } from "antd/es/upload";
 
 import type { ChunkInfo, UseFileUploadReturn } from "../types";
-import { createFileChunks, calculateFileHash } from "../utils/file-utils";
+import { calculateFileHash } from "../utils/file-utils";
 import { startUploadProcess } from "../utils/upload-core";
 
 type FileListItem = {
@@ -83,13 +83,18 @@ export const useFileUpload = (
         fileNameRef.current = fileName;
         fileSizeRef.current = fileSize;
 
-        // 文件在主线程切片后得到 chunks 数组丢到 WebWorker 线程计算 hash
-        const fileChunks = createFileChunks(file as File);
+        // 计算整个文件的 hash（同时在 Worker 中完成分片）
+        setIsUploading(true);
+        const { hash, chunks } = await calculateFileHash(file as File);
+        const fileId = hash;
+
+        // 将 ArrayBuffer 转换为 ChunkInfo 格式
+        const fileChunks: ChunkInfo[] = chunks.map((chunk, index) => ({
+          index,
+          chunk,
+        }));
         fileChunksRef.current = fileChunks;
 
-        // 计算整个文件的 hash
-        setIsUploading(true);
-        const fileId = await calculateFileHash(file as File);
         fileIdRef.current = fileId;
 
         // 开始上传流程

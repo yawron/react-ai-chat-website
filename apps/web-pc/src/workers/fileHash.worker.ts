@@ -9,6 +9,7 @@ type HashResponse = {
   hash?: string;
   error?: string;
   progress?: number;
+  chunks?: ArrayBuffer[];
 };
 
 const ctx = self as unknown as {
@@ -21,6 +22,7 @@ ctx.onmessage = async (event: MessageEvent<HashRequest>) => {
     const { file, chunkSize } = event.data;
     const spark = new SparkMD5.ArrayBuffer();
     const total = Math.ceil(file.size / chunkSize);
+    const chunks: ArrayBuffer[] = [];
 
     // 一次遍历边计算每个 chunk 的 hash，每计算一个 chunk 就 append
     for (let i = 0; i < total; i += 1) {
@@ -30,6 +32,9 @@ ctx.onmessage = async (event: MessageEvent<HashRequest>) => {
       // 每次 append 当前 chunk 的 hash
       spark.append(buffer);
 
+      // 保存 chunk 供上传使用
+      chunks.push(buffer);
+
       // 发送进度
       ctx.postMessage({
         progress: Math.round(((i + 1) / total) * 100),
@@ -38,7 +43,7 @@ ctx.onmessage = async (event: MessageEvent<HashRequest>) => {
 
     // 遍历完成后 end 得到最终整个文件的 hash 值
     const hash = spark.end();
-    const message: HashResponse = { hash };
+    const message: HashResponse = { hash, chunks };
     ctx.postMessage(message);
   } catch (error) {
     const message: HashResponse = {
