@@ -79,6 +79,7 @@ export const ChatBubble = () => {
           width: "50vw",
         }}
         itemContent={(index, message) => {
+          if (!message) return null;
           const bubbleProps = getBubbleProps(message.role);
           return (
             <div className="px-4 py-2" data-index={index}>

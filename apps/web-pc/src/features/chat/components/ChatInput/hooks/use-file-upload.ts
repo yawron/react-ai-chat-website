@@ -48,6 +48,7 @@ export const useFileUpload = (
   const filePathRef = useRef<string | null>(null);
   const fileSizeRef = useRef<number>(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const alreadyUploadedRef = useRef<number>(0); // 记录已上传的分片数（来自断点续传）
 
   // 重置上传状态
   const resetUploadState = useCallback(() => {
@@ -57,6 +58,7 @@ export const useFileUpload = (
     filePathRef.current = null;
     fileSizeRef.current = 0;
     fileChunksRef.current = [];
+    alreadyUploadedRef.current = 0;
     setUploadProgress(0);
     setIsUploading(false);
     setUploadedChunks([]);
@@ -140,7 +142,7 @@ export const useFileUpload = (
           successChunks.push(chunk.index);
           // 更新进度
           const totalChunks = allChunks.length;
-          const uploadedCount = uploadedChunks.length + successChunks.length;
+          const uploadedCount = alreadyUploadedRef.current + successChunks.length;
           setUploadProgress(calculateProgress(uploadedCount, totalChunks));
 
           return true;
@@ -264,6 +266,7 @@ export const useFileUpload = (
 
     // 记录已上传的分片
     setUploadedChunks(alreadyUploadedChunks);
+    alreadyUploadedRef.current = alreadyUploadedChunks.length;
 
     // 步骤4: filter 留下未上传分片的索引，得到需要上传索引数组
     const totalChunkCount = fileChunks.length;
@@ -344,11 +347,15 @@ export const useFileUpload = (
         fileChunksRef.current = fileChunks;
 
         // 计算整个文件的 hash
+        setIsUploading(true);
         const fileId = await calculateFileHash(file as File);
         fileIdRef.current = fileId;
 
         // 开始上传流程
         await startUploadProcess();
+
+        // 上传完成
+        setIsUploading(false);
       } catch (error: unknown) {
         console.log("上传过程出错:", error);
         message.error("文件上传失败");
@@ -359,6 +366,7 @@ export const useFileUpload = (
         );
       } finally {
         setIsLoading(false);
+        setIsUploading(false);
       }
     };
 
