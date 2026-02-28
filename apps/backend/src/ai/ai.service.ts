@@ -18,6 +18,12 @@ export class AiService {
     });
   }
 
+  // 将图片转为 base64
+  private async imageToBase64(filePath: string): Promise<string> {
+    const buffer = fs.readFileSync(filePath);
+    return buffer.toString('base64');
+  }
+
   async getAiWithFile(filePath: string) {
     // 将URL路径转换为本地文件系统路径
     let localFilePath = filePath;
@@ -42,6 +48,18 @@ export class AiService {
     localFilePath = path.normalize(localFilePath);
 
     console.log('转换后的本地路径:', localFilePath);
+
+    // 检查是否是图片文件
+    const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(filePath);
+
+    if (isImage) {
+      // 对于图片，转换为 base64 并返回
+      const base64 = await this.imageToBase64(localFilePath);
+      // 获取文件扩展名确定 mime 类型
+      const ext = path.extname(localFilePath).toLowerCase();
+      const mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
+      return `data:${mimeType};base64,${base64}`;
+    }
 
     const fileObject = await this.openai.files.create({
       file: fs.createReadStream(localFilePath),
@@ -82,13 +100,13 @@ export class AiService {
     const isImage = isImageByExtension(filePath);
     const model = isImage ? 'qwen-vl-plus' : 'qwen-long';
 
-    const content = filePath
-      ? await this.getAiWithFile(filePath)
-      : this.defaultMessage;
+    // 获取图片的 base64 数据
+    const imageData = filePath ? await this.getAiWithFile(filePath) : null;
 
-    const userContent = isImage
-      ? this.getAiWithImg(message, filePath)
-      : message;
+    const content = imageData || this.defaultMessage;
+
+    const userContent =
+      isImage && imageData ? this.getAiWithImg(message, imageData) : message;
 
     const completion = await this.openai.chat.completions.create({
       model: model,

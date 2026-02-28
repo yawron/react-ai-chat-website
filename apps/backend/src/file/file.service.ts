@@ -14,7 +14,6 @@ import {
 } from './dto';
 import { Chat } from '../chat/entities/chat.entity';
 import { FileEntity } from './entities/file.entity';
-import { BASE_URL } from 'src/constant';
 
 @Injectable()
 export class FileService {
@@ -47,8 +46,8 @@ export class FileService {
   private getRelativeFilePath(absolutePath: string): string {
     // 将绝对路径转换为相对于uploads目录的路径
     const relativePath = path.relative(this.uploadDir, absolutePath);
-    // 转换为URL格式，使用正斜杠
-    return `${BASE_URL}/uploads/${relativePath.replace(/\\/g, '/')}`;
+    // 返回相对路径
+    return `/uploads/${relativePath.replace(/\\/g, '/')}`;
   }
 
   async checkFile(checkFileDto: CheckFileDto) {
@@ -181,16 +180,21 @@ export class FileService {
       throw new HttpException('文件记录不存在', HttpStatus.BAD_REQUEST);
     }
 
+    // 检查临时目录中的实际分片数量
+    const chunkDir = path.join(this.tempDir, fileId);
+    const uploadedCount = fs.existsSync(chunkDir)
+      ? fs.readdirSync(chunkDir).length
+      : 0;
+
     // 检查是否所有切片都已上传
-    if (fileRecord.uploadedChunks !== totalChunks) {
+    if (uploadedCount !== totalChunks) {
       throw new HttpException(
-        `切片数量不匹配，已上传 ${fileRecord.uploadedChunks}，总共 ${totalChunks}`,
+        `切片数量不匹配，已上传 ${uploadedCount}，总共 ${totalChunks}`,
         HttpStatus.BAD_REQUEST,
       );
     }
 
     // 合并文件
-    const chunkDir = path.join(this.tempDir, fileId);
     const filePath = path.join(this.uploadDir, fileName);
     const writeStream = fs.createWriteStream(filePath);
 

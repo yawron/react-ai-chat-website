@@ -9,6 +9,7 @@
   /* IE and Edge */
   scrollbar-width: none;
   /* Firefox */
+  padding-bottom: 100px !important;
 }
 
 /* 图片消息样式 */
