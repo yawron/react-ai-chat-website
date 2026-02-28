@@ -1,17 +1,14 @@
 import { useRef, useCallback } from "react";
 
 import { createSSE, sendChatMessage } from "@pc/apis/chat";
-import { sessionApi } from "@pc/apis/session";
-import { useChatStore, useConversationStore } from "@pc/store";
-
-interface SendMessageParams {
-  chatId: string;
-  message: string;
-  fileId?: string;
-}
+import { useChatStore } from "@pc/store";
 
 interface UseChatSendReturn {
-  sendMessage: (chatId: string, message: string, fileId?: string) => Promise<void>;
+  sendMessage: (
+    chatId: string,
+    message: string,
+    fileId?: string,
+  ) => Promise<void>;
   createSSEAndSendMessage: (
     chatId: string,
     message: string,
@@ -22,10 +19,8 @@ interface UseChatSendReturn {
 
 export const useChatSend = (): UseChatSendReturn => {
   const eventSourceRef = useRef<EventSource | null>(null);
-  const idRef = useRef<string | null>(null);
 
-  const { addMessage, addChunkMessage } = useChatStore();
-  const { setSelectedId, addConversation } = useConversationStore();
+  const { addChunkMessage } = useChatStore();
 
   const sendMessage = useCallback(
     async (chatId: string, chatMessage: string, fileId?: string) => {
@@ -39,7 +34,12 @@ export const useChatSend = (): UseChatSendReturn => {
   );
 
   const createSSEAndSendMessage = useCallback(
-    (chatId: string, chatMessage: string, fileId?: string, onComplete?: () => void) => {
+    (
+      chatId: string,
+      chatMessage: string,
+      fileId?: string,
+      onComplete?: () => void,
+    ) => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
