@@ -17,11 +17,7 @@ import {
   postMergeFileAPI,
 } from "@pc/apis/chat";
 import type { ChunkInfo, UploadTask, UseFileUploadReturn } from "../types";
-import {
-  CHUNK_SIZE,
-  CONCURRENT_UPLOADS,
-  MAX_RETRY_COUNT,
-} from "../utils/file-config";
+import { CONCURRENT_UPLOADS, MAX_RETRY_COUNT } from "../utils/file-config";
 import {
   createFileChunks,
   calculateFileHash,
@@ -142,7 +138,8 @@ export const useFileUpload = (
           successChunks.push(chunk.index);
           // 更新进度
           const totalChunks = allChunks.length;
-          const uploadedCount = alreadyUploadedRef.current + successChunks.length;
+          const uploadedCount =
+            alreadyUploadedRef.current + successChunks.length;
           setUploadProgress(calculateProgress(uploadedCount, totalChunks));
 
           return true;
@@ -238,11 +235,7 @@ export const useFileUpload = (
 
     // 步骤3: 向后端接口发送一个前置请求，带上文件名和 hash
     const {
-      data: {
-        isCompleted,
-        uploaded: uploadedChunkIndices,
-        filePath,
-      },
+      data: { isCompleted, uploaded: uploadedChunkIndices = [], filePath },
     } = await getCheckFileAPI(
       fileId,
       fileName,
