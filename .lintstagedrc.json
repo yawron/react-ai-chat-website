@@ -1,10 +1,10 @@
 {
-  "backend/**/*.{ts,js,json}": [
-    "pnpm -C backend run format",
-    "pnpm -C backend run lint"
+  "apps/backend/**/*.{ts,js,json}": [
+    "pnpm -C apps/backend run format",
+    "pnpm -C apps/backend run lint"
   ],
-  "frontend/**/*.{ts,tsx,js,jsx,json,css,md}": [
-    "pnpm -C frontend run format",
-    "pnpm -C frontend run lint"
+  "apps/web-pc/**/*.{ts,tsx,js,jsx,json,css,md}": [
+    "pnpm -C apps/web-pc run format",
+    "pnpm -C apps/web-pc run lint"
   ]
 }
