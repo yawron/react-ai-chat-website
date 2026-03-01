@@ -8,7 +8,9 @@ export interface FileHashResult {
 /**
  * 使用 WebWorker 计算文件 hash 并获取分片
  */
-export const calculateFileHash = async (file: File): Promise<FileHashResult> => {
+export const calculateFileHash = async (
+  file: File,
+): Promise<FileHashResult> => {
   return new Promise((resolve, reject) => {
     const worker = new Worker(
       new URL("@pc/workers/fileHash.worker.ts", import.meta.url),

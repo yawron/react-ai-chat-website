@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import {
@@ -11,6 +12,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get(ConfigService);
+  const port = configService.get('PORT') || 3000;
 
   // 配置静态文件服务 - 修复路径问题
   const uploadsPath =
@@ -33,7 +36,7 @@ async function bootstrap() {
 
   // 跨域
   app.enableCors();
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
 }
-
 bootstrap();
