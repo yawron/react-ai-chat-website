@@ -1,25 +1,15 @@
 import { XProvider } from "@ant-design/x";
 import { App as AntdApp, ConfigProvider, theme as antdTheme } from "antd";
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 import "@pc/locales";
 import ThemeToggle from "@pc/shared/components/ThemeToggle";
-import { useUserStore, useLocaleStore, useThemeStore } from "@pc/store";
+import { useLocaleStore, useThemeStore } from "@pc/store";
 import { ErrorBoundary } from "@pc/shared/components/ErrorBoundary";
 import AntdGlobal from "@pc/utils/antdGlobal";
 
 function App() {
-  const { isAuthenticated, error } = useUserStore();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isAuthenticated && error) {
-      navigate("/login");
-      useUserStore.setState({ error: null });
-    }
-  }, [isAuthenticated, error, navigate]);
-
   const { antdLocale } = useLocaleStore();
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
