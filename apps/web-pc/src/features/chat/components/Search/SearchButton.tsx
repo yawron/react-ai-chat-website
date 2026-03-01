@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 
 import { sessionApi } from "@pc/apis/session";
 import { useConversationStore } from "@pc/store";
-import { useThemeStore } from "@pc/store";
 
 import type { ChatSession } from "@pc/types/session";
 
@@ -19,8 +18,6 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { setSelectedId } = useConversationStore();
-  const { theme } = useThemeStore();
-  const isDark = theme === "dark";
   const [searchResults, setSearchResults] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -88,9 +85,7 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
       <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-20">
         <div
           ref={modalRef}
-          className={`w-[640px] rounded-xl border shadow-2xl overflow-hidden ${
-            isDark ? "bg-[#141414] border-gray-700" : "bg-white border-gray-200"
-          }`}
+          className="w-[640px] rounded-xl border shadow-2xl overflow-hidden bg-white border-gray-200"
         >
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-medium dark:text-white">
