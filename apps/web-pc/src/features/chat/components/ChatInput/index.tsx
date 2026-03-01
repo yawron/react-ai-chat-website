@@ -54,9 +54,9 @@ const ChatInput: React.FC = () => {
   }, [selectedId, resetUploadState]);
 
   // 监听输入值变化
-  const handleInputChange = useCallback((value: string) => {
+  const handleInputChange = (value: string) => {
     setInputValue(value);
-  }, []);
+  };
 
   // 粘贴上传/文件框选择上传都会拦截至此处
   const handleFileUpload = useCallback(
