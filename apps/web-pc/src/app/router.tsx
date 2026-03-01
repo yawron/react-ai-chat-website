@@ -8,7 +8,7 @@ import {
 import App from "@pc/App";
 import { LayoutWithSidebar } from "@pc/shared/components/Layout/LayoutWithSidebar";
 import { PageTransition } from "@pc/shared/components/PageTransition/PageTransition";
-import { WithPermission } from "@pc/shared/components/WithPermission/WithPermission";
+import { WithPermission } from "@pc/shared/components/WithPermission";
 import Agents from "@pc/features/agents/pages/Agents";
 import CreateAccount from "@pc/features/auth/pages/CreateAccount";
 import Home from "@pc/features/chat/pages/Home";
