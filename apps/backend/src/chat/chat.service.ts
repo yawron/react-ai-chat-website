@@ -109,11 +109,9 @@ export class ChatService {
         }
       }
 
-      // 发送完整内容和完成标志
+      // 发送完成信号
       this.sendMessageToChat(id, {
         type: 'complete',
-        content: fullContent,
-        isComplete: true,
       });
 
       await this.saveMessage(id, fullContent, MessageRole.SYSTEM); // 保存AI的响应到数据库
@@ -122,11 +120,10 @@ export class ChatService {
     } catch (error) {
       this.logger.error(`聊天 ${id} 出错：${error}`);
 
-      // 发送错误信息到前端
+      // 发送错误信号到前端
       this.sendMessageToChat(id, {
         type: 'error',
-        content: `发生错误: ${error || '未知错误'}`,
-        isComplete: true,
+        message: `发生错误: ${error || '未知错误'}`,
       });
 
       this.logger.log(
