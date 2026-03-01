@@ -5,10 +5,12 @@ import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 
 import { useChatStore, useConversationStore } from "@pc/store";
 
+import type { MessageProps } from "@pc/store";
+
 import { allMessageContent } from "./content";
 
 import type { MessageContent } from "@pc/types/chat";
-import type { Role, Message } from "@pc/types/common";
+import type { Role } from "@pc/types/common";
 import "./bubble.css";
 import "highlight.js/styles/github.css";
 
@@ -33,7 +35,7 @@ const getBubbleProps = (role: Role) => {
   };
 };
 
-const renderMessageContent = (content: MessageContent[]) => {
+const renderMessageContent = (content: MessageContent[], role: Role) => {
   if (!content || content.length === 0) {
     return null;
   }
@@ -41,6 +43,14 @@ const renderMessageContent = (content: MessageContent[]) => {
   return (
     <div className="message-content">
       {content.map((item, index) => {
+        // 用户消息的 text 类型不渲染 Markdown，AI 消息才渲染
+        if (item.type === "text" && role === "user") {
+          return (
+            <div key={index} className="text-content">
+              {item.content}
+            </div>
+          );
+        }
         return (
           <div key={index}>
             {/*  eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
@@ -55,13 +65,13 @@ const renderMessageContent = (content: MessageContent[]) => {
 };
 
 // 使用 React.memo 包装单条消息组件，避免历史消息因父组件状态更新而重新渲染
-const MessageBubble = memo(({ message }: { message: Message }) => {
+const MessageBubble = memo(({ message }: { message: MessageProps }) => {
   const bubbleProps = getBubbleProps(message.role);
   return (
     <div className="px-4 py-2">
       <Bubble
         {...bubbleProps}
-        content={renderMessageContent(message.content)}
+        content={renderMessageContent(message.content, message.role)}
       />
     </div>
   );
@@ -95,7 +105,7 @@ export const ChatBubble = () => {
         }}
         itemContent={(index, message) => {
           if (!message) return null;
-          return <MessageBubble key={message.id || index} message={message} />;
+          return <MessageBubble key={index} message={message} />;
         }}
       />
     </div>
