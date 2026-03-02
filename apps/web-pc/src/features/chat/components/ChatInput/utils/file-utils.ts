@@ -1,8 +1,13 @@
 import { CHUNK_SIZE } from "./file-config";
 
+type ChunkData = {
+  chunk: ArrayBuffer;
+  hash: string;
+};
+
 export interface FileHashResult {
   hash: string;
-  chunks: ArrayBuffer[];
+  chunks: ChunkData[];
 }
 
 /**
@@ -28,7 +33,7 @@ export const calculateFileHash = async (
         hash?: string;
         error?: string;
         progress?: number;
-        chunks?: ArrayBuffer[];
+        chunks?: ChunkData[];
       }>,
     ) => {
       const { hash, error, progress, chunks } = event.data || {};

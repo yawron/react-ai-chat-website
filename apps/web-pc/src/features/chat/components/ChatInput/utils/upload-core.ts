@@ -1,5 +1,3 @@
-import SparkMD5 from "spark-md5";
-
 import {
   getCheckFileAPI,
   postFileChunksAPI,
@@ -33,11 +31,8 @@ export const uploadSingleChunk = async (
   controller: AbortController,
 ): Promise<boolean> => {
   try {
-    // chunk.chunk 已经是 ArrayBuffer
+    // chunk.chunk 已经是 ArrayBuffer，直接使用 Worker 计算好的 hash
     const chunkBuffer = chunk.chunk;
-    const spark = new SparkMD5.ArrayBuffer();
-    spark.append(chunkBuffer);
-    const chunkHash = spark.end();
 
     const formData = new FormData();
     formData.append("fileId", fileId);
@@ -45,7 +40,7 @@ export const uploadSingleChunk = async (
     formData.append("index", String(chunk.index));
     // ArrayBuffer 转 Blob
     formData.append("chunk", new Blob([chunkBuffer]));
-    formData.append("chunkHash", chunkHash);
+    formData.append("chunkHash", chunk.hash);
 
     const response = await postFileChunksAPI(formData, controller.signal);
 

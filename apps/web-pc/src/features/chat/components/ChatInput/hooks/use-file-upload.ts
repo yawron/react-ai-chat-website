@@ -88,10 +88,11 @@ export const useFileUpload = (
         const { hash, chunks } = await calculateFileHash(file as File);
         const fileId = hash;
 
-        // 将 ArrayBuffer 转换为 ChunkInfo 格式
-        const fileChunks: ChunkInfo[] = chunks.map((chunk, index) => ({
+        // 将 Worker 返回的分片数据转换为 ChunkInfo 格式（包含分片 hash）
+        const fileChunks: ChunkInfo[] = chunks.map((item, index) => ({
           index,
-          chunk,
+          chunk: item.chunk,
+          hash: item.hash,
         }));
         fileChunksRef.current = fileChunks;
 

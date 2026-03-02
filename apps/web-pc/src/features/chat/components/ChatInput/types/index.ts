@@ -3,6 +3,7 @@ import type { RcFile } from "antd/es/upload";
 export interface ChunkInfo {
   index: number;
   chunk: ArrayBuffer;
+  hash: string;
 }
 
 export interface UploadTask {

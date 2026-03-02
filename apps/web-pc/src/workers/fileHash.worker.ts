@@ -5,11 +5,16 @@ type HashRequest = {
   chunkSize: number;
 };
 
+type ChunkData = {
+  chunk: ArrayBuffer;
+  hash: string;
+};
+
 type HashResponse = {
   hash?: string;
   error?: string;
   progress?: number;
-  chunks?: ArrayBuffer[];
+  chunks?: ChunkData[];
 };
 
 const ctx = self as unknown as {
@@ -22,18 +27,24 @@ ctx.onmessage = async (event: MessageEvent<HashRequest>) => {
     const { file, chunkSize } = event.data;
     const spark = new SparkMD5.ArrayBuffer();
     const total = Math.ceil(file.size / chunkSize);
-    const chunks: ArrayBuffer[] = [];
+    const chunks: ChunkData[] = [];
 
-    // 一次遍历边计算每个 chunk 的 hash，每计算一个 chunk 就 append
+    // 一次遍历边切片边计算每个 chunk 的 hash
     for (let i = 0; i < total; i += 1) {
       const start = i * chunkSize;
       const end = Math.min(file.size, start + chunkSize);
       const buffer = await file.slice(start, end).arrayBuffer();
-      // 每次 append 当前 chunk 的 hash
+
+      // 计算当前分片的 hash
+      const chunkSpark = new SparkMD5.ArrayBuffer();
+      chunkSpark.append(buffer);
+      const chunkHash = chunkSpark.end();
+
+      // 累加到整体 hash
       spark.append(buffer);
 
-      // 保存 chunk 供上传使用
-      chunks.push(buffer);
+      // 保存分片数据和对应的 hash
+      chunks.push({ chunk: buffer, hash: chunkHash });
 
       // 发送进度
       ctx.postMessage({
