@@ -2,7 +2,6 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
-  Outlet,
 } from "react-router-dom";
 
 import App from "@pc/App";
@@ -15,10 +14,8 @@ import Login from "@pc/features/auth/pages/Login";
 // 创建React Router路由
 const routeElements = createRoutesFromElements(
   <Route path="/" element={<App />}>
-    <Route element={<Outlet />}>
-      <Route path="/login" element={<Login />} />
-      <Route path="/create-account" element={<CreateAccount />} />
-    </Route>
+    <Route path="/login" element={<Login />} />
+    <Route path="/create-account" element={<CreateAccount />} />
     <Route
       element={
         <WithPermission>
