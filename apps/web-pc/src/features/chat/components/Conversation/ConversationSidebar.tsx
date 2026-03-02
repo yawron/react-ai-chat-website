@@ -12,16 +12,8 @@ import { SearchButton } from "@pc/features/chat/components/Search/SearchButton";
 import { useChatStore } from "@pc/store";
 
 import { useConversationActions } from "./hooks/useConversationActions";
-import { ShareDialog } from "./ShareDialog";
 
 export function ConversationSidebar() {
-  const [shareDialogChatId, setShareDialogChatId] = useState<string | null>(
-    null,
-  );
-
-  const handleShare = (id: string) => {
-    setShareDialogChatId(id);
-  };
   const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const {
@@ -56,15 +48,6 @@ export function ConversationSidebar() {
       },
     },
     {
-      key: "share",
-      label: "分享",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (e: any) => {
-        e.domEvent.stopPropagation();
-        handleShare(id);
-      },
-    },
-    {
       key: "delete",
       label: "删除",
       danger: true,
@@ -82,7 +65,7 @@ export function ConversationSidebar() {
   const handleConversationClick = async (id: string) => {
     // 点击会话时将id添加到url中
     setSelectedId(id);
-    navigate(`/conversation/${id}`);
+    navigate(`/${id}`);
 
     if (messages.get(id) !== undefined) {
       return;
@@ -182,10 +165,6 @@ export function ConversationSidebar() {
           ))}
         </ul>
       </div>
-      <ShareDialog
-        chatId={shareDialogChatId}
-        onClose={() => setShareDialogChatId(null)}
-      />
     </div>
   );
 }

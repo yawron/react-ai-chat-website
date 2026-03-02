@@ -21,7 +21,7 @@ export function useConversationActions() {
 
   const handleAddConversation = async () => {
     setSelectedId(null);
-    navigate(`/conversation`);
+    navigate(`/`);
   };
 
   const handleDelete = async (id: string) => {

@@ -141,7 +141,7 @@ export const SearchButton = ({ isOpen, onClose }: SearchButtonProps) => {
                     className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:hover:bg-gray-800"
                     onClick={() => {
                       setSelectedId(chat.id);
-                      navigate(`/conversation/${chat.id}`);
+                      navigate(`/${chat.id}`);
                       onClose();
                     }}
                   >
