@@ -18,7 +18,7 @@ type HashResponse = {
 };
 
 const ctx = self as unknown as {
-  postMessage: (data: HashResponse) => void;
+  postMessage: (data: HashResponse, transfer?: Transferable[]) => void;
   onmessage: ((event: MessageEvent<HashRequest>) => void) | null;
 };
 
@@ -54,8 +54,11 @@ ctx.onmessage = async (event: MessageEvent<HashRequest>) => {
 
     // 遍历完成后 end 得到最终整个文件的 hash 值
     const hash = spark.end();
+
+    // 使用 Transferable Objects 转移 ArrayBuffer 所有权，避免复制开销
+    const transferables = chunks.map((c) => c.chunk);
     const message: HashResponse = { hash, chunks };
-    ctx.postMessage(message);
+    ctx.postMessage(message, transferables);
   } catch (error) {
     const message: HashResponse = {
       error: error instanceof Error ? error.message : "Worker hash failed",
